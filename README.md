@@ -25,17 +25,26 @@
 
 ### 2. 網址元資料解析模組 (`urlMetadata/`)
 用於自動讀取並解析文字中的 URL，提取網頁的 Open Graph (OG) 標籤或特定平台的詳細資訊。
-- 支援 **Bilibili (B站)** 的影片標題、UP 主、觀看次數與簡介解析。
+- 支援 **Bilibili (B站)** 的影片標題、UP 主、觀看次數與簡介解析。（若設定 `.env` 可額外獲取 AI 影片總結與提綱）
 - 支援一般網站的標題與描述解析。
 
 ---
 
-## 🚀 安裝與使用
+## 🚀 安裝與配置
 
 ```bash
 # 安裝依賴套件 (如 cheerio 等)
 npm install
 ```
+
+### 環境變數設定 (.env)
+
+若需要啟用 Bilibili (B站) 影片的 AI 總結功能，請在專案根目錄建立 `.env` 檔案並填寫：
+
+```env
+BILIBILI_SESSDATA=你的_Bilibili_SESSDATA_Cookie
+```
+> **提示**：登入 B站後，在瀏覽器開發者工具的 Application -> Cookies 中可找到 `SESSDATA`。DuckDuckGo 搜尋與一般網頁解析則完全**不需要**設定任何環境變數即可使用。
 
 ### 使用範例
 

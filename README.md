@@ -25,8 +25,7 @@
 
 ### 2. 網址元資料解析模組 (`urlMetadata/`)
 用於自動讀取並解析文字中的 URL，提取網頁的 Open Graph (OG) 標籤或特定平台的詳細資訊。
-- 支援 **Bilibili (B站)** 的影片標題、UP 主、觀看次數與簡介解析。（若設定 `.env` 可額外獲取 AI 影片總結與提綱）
-  > *註：Bilibili API 相關實作參考了 [bilibili-API-collect](https://github.com/watermelon1024/bilibili-API-collect)。*
+- 支援 **Bilibili (B站)** 的影片標題、UP 主、觀看次數與簡介解析。（若設定 `.env` 可額外獲取 AI 影片總結與提綱）[API 參考](https://github.com/watermelon1024/bilibili-API-collect)
 - 支援一般網站的標題與描述解析。
 
 ---

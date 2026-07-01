@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🤖 LLMFetch
+# 🤖 LLMFetch (Python 移植版)
 
 **專為 LLM (大型語言模型) 打造的輕量級網頁資訊獲取工具集**
 
@@ -18,10 +18,10 @@
 
 目前提供的核心工具位於 `src/utils/` 目錄下：
 
-### 1. DuckDuckGo 搜尋模組 (`search.js`)
+### 1. DuckDuckGo 搜尋模組 (`search.py`)
 用於進行網頁與圖片搜尋，並抓取搜尋結果的標題與摘要。
-- **`searchWeb(query)`**: 進行文字搜尋，回傳前 5 筆摘要。
-- **`searchImages(query)`**: 進行圖片搜尋，回傳前 5 張圖片網址與來源。
+- **`search_web(query)`**: 進行文字搜尋，回傳前 5 筆摘要。
+- **`search_images(query)`**: 進行圖片搜尋，回傳前 5 張圖片網址與來源。
 
 ### 2. 網址元資料解析模組 (`urlMetadata/`)
 用於自動讀取並解析文字中的 URL，提取網頁的 Open Graph (OG) 標籤或特定平台的詳細資訊。
@@ -51,8 +51,8 @@
 ## 🚀 安裝與配置
 
 ```bash
-# 安裝依賴套件 (如 cheerio 等)
-npm install
+# 安裝 Python 依賴套件
+pip install -r requirements.txt
 ```
 
 ### 環境變數設定 (.env)
@@ -62,31 +62,31 @@ npm install
 ```env
 BILIBILI_SESSDATA=你的_Bilibili_SESSDATA_Cookie
 ```
-> **提示**：登入 B站後，在瀏覽器開發者工具的 Application -> Cookies 中可找到 `SESSDATA`。DuckDuckGo 搜尋與一般網頁解析則完全**不需要**設定任何環境變數即可使用。
+> **提示**：請確保在主程式入口使用 `dotenv` 載入環境變數（例如 `load_dotenv()`）。登入 B站後，在瀏覽器開發者工具的 Application -> Cookies 中可找到 `SESSDATA`。DuckDuckGo 搜尋與一般網頁解析則完全**不需要**設定任何環境變數即可使用。
 
 ### 使用範例
 
 **DuckDuckGo 網頁搜尋：**
-```javascript
-const { searchWeb } = require('./src/utils/search');
+```python
+from src.utils.search import search_web
 
-async function test() {
-    const result = await searchWeb('Node.js 20 新特性');
-    console.log(result);
-}
-test();
+def test():
+    result = search_web('Python 3.12 新特性')
+    print(result)
+
+test()
 ```
 
 **解析文字中的網址：**
-```javascript
-const { extractUrlsMetadata } = require('./src/utils/urlMetadata');
+```python
+from src.utils.urlMetadata import extract_urls_metadata
 
-async function test() {
-    const text = "快看這個影片：https://www.bilibili.com/video/BV1xx411c7mD";
-    const result = await extractUrlsMetadata(text);
-    console.log(result);
-}
-test();
+def test():
+    text = "快看這個影片：https://www.bilibili.com/video/BV1xx411c7mD"
+    result = extract_urls_metadata(text)
+    print(result)
+
+test()
 ```
 
 ---

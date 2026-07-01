@@ -7,8 +7,16 @@
 # 基本必要檔案
 !.gitignore
 !README.md
-!package.json
-!package-lock.json
+!requirements.txt
+!LICENSE
 
 # 僅開源的工具 (fetch 相關)
 !src/utils/**
+
+# 忽略 Python 相關暫存檔與套件
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+venv/
+env/

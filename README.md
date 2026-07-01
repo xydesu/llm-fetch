@@ -1,0 +1,69 @@
+<div align="center">
+
+# 🤖 LLMFetch
+
+**專為 LLM (大型語言模型) 打造的輕量級網頁資訊獲取工具集**
+
+</div>
+
+---
+
+## 📖 專案介紹
+
+本專案提供了一套實用的網路請求與網頁解析工具模組，主要設計用來為大語言模型 (LLM) 擴充外部世界知識與聯網能力（例如 RAG 應用）。它簡化了網頁搜尋與網址元資料的擷取流程，目前支援透過 DuckDuckGo 進行無縫的網頁及圖片搜尋，以及解析特定網站（如 Bilibili）或一般網站的 Open Graph (OG) 標籤。
+
+---
+
+## ✨ 包含的工具模組
+
+目前提供的核心工具位於 `src/utils/` 目錄下：
+
+### 1. DuckDuckGo 搜尋模組 (`search.js`)
+用於進行網頁與圖片搜尋，並抓取搜尋結果的標題與摘要。
+- **`searchWeb(query)`**: 進行文字搜尋，回傳前 5 筆摘要。
+- **`searchImages(query)`**: 進行圖片搜尋，回傳前 5 張圖片網址與來源。
+
+### 2. 網址元資料解析模組 (`urlMetadata/`)
+用於自動讀取並解析文字中的 URL，提取網頁的 Open Graph (OG) 標籤或特定平台的詳細資訊。
+- 支援 **Bilibili (B站)** 的影片標題、UP 主、觀看次數與簡介解析。
+- 支援一般網站的標題與描述解析。
+
+---
+
+## 🚀 安裝與使用
+
+```bash
+# 安裝依賴套件 (如 cheerio 等)
+npm install
+```
+
+### 使用範例
+
+**DuckDuckGo 網頁搜尋：**
+```javascript
+const { searchWeb } = require('./src/utils/search');
+
+async function test() {
+    const result = await searchWeb('Node.js 20 新特性');
+    console.log(result);
+}
+test();
+```
+
+**解析文字中的網址：**
+```javascript
+const { extractUrlsMetadata } = require('./src/utils/urlMetadata');
+
+async function test() {
+    const text = "快看這個影片：https://www.bilibili.com/video/BV1xx411c7mD";
+    const result = await extractUrlsMetadata(text);
+    console.log(result);
+}
+test();
+```
+
+---
+
+## 授權條款
+
+本專案採用 [MIT License](LICENSE) 授權。

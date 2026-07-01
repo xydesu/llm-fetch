@@ -1,0 +1,14 @@
+# 忽略所有檔案
+*
+
+# 不忽略目錄 (以便可以遞迴尋找不忽略的檔案)
+!*/
+
+# 基本必要檔案
+!.gitignore
+!README.md
+!package.json
+!package-lock.json
+
+# 僅開源的工具 (fetch 相關)
+!src/utils/**

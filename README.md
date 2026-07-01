@@ -28,6 +28,24 @@
 - 支援 **Bilibili (B站)** 的影片標題、UP 主、觀看次數與簡介解析。（若設定 `.env` 可額外獲取 AI 影片總結與提綱）[API 參考](https://github.com/watermelon1024/bilibili-API-collect)
 - 支援一般網站的標題與描述解析。
 
+### 🔮 未來可能支援的平台解析
+
+未來可能將以下平台的元資料解析整合至本工具集，主要參考來源如下：
+- **Twitter/X**: [FxEmbed](https://github.com/FxEmbed/FxEmbed)/[BetterTwitFix](https://github.com/dylanpdx/BetterTwitFix)/[EmbedEZ](https://embedez.com)
+- **Pixiv**: [Phixiv](https://github.com/thelaao/phixiv)
+- **TikTok**: [fxTikTok](https://github.com/okdargy/fxTikTok)/[EmbedEZ](https://embedez.com)/[KKTikTok](https://kkscript.com/)
+- **Reddit**: [FixReddit](https://github.com/MinnDevelopment/fxreddit)/[vxReddit](https://github.com/dylanpdx/vxReddit)/[EmbedEZ](https://embedez.com)
+- **Instagram**: [InstaFix](https://github.com/Wikidepia/InstaFix)/[EmbedEZ](https://embedez.com)/[KKInstagram](https://kkscript.com/)/[vxinstagram](https://github.com/Lainmode/InstagramEmbed-vxinstagram)/[InstaEmbedRouter](https://github.com/Knoppiix/InstaEmbedRouter)
+- **FurAffinity**: [xfuraffinity](https://github.com/FirraWoof/xfuraffinity)/[fxraffinity](https://fxraffinity.net/)
+- **Twitch Clips**: [fxtwitch](https://github.com/seriaati/fxtwitch)
+- **Iwara**: [fxiwara](https://github.com/seriaati/fxiwara)
+- **Bluesky**: [VixBluesky](https://github.com/Lexedia/VixBluesky)/[FxEmbed](https://github.com/FxEmbed/FxEmbed)
+- **Facebook**: [EmbedEZ](https://embedez.com)/[fxfacebook](https://github.com/seriaati/fxfacebook)/[facebed](https://github.com/4pii4/facebed)
+- **Tumblr**: [fxtumblr](https://github.com/knuxify/fxtumblr)
+- **Threads**: [FixThreads](https://github.com/milanmdev/fixthreads)/[vxThreads](https://github.com/everettsouthwick/vxThreads)/[EmbedEZ](https://embedez.com)/[FixEmbed](https://fixembed.app)
+- **PTT**: [fxptt](https://github.com/seriaati/fxptt)
+- **DeviantArt**: [fxdeviantart](https://github.com/Tschrock/fixdeviantart)
+
 ---
 
 ## 🚀 安裝與配置

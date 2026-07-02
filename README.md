@@ -25,13 +25,13 @@
 
 ### 2. 網址元資料解析模組 (`urlMetadata/`)
 用於自動讀取並解析文字中的 URL，提取網頁的 Open Graph (OG) 標籤或特定平台的詳細資訊。
+- 支援 **Twitter/X** 的推文內容、作者名稱、轉推按讚數與媒體附件資訊解析。
 - 支援 **Bilibili (B站)** 的影片標題、UP 主、觀看次數與簡介解析。（若設定 `.env` 可額外獲取 AI 影片總結與提綱）[API 參考](https://github.com/watermelon1024/bilibili-API-collect)
 - 支援一般網站的標題與描述解析。
 
 ### 🔮 未來可能支援的平台解析
 
 未來可能將以下平台的元資料解析整合至本工具集，主要參考來源如下：
-- **Twitter/X**: [FxEmbed](https://github.com/FxEmbed/FxEmbed)/[BetterTwitFix](https://github.com/dylanpdx/BetterTwitFix)/[EmbedEZ](https://embedez.com)
 - **Pixiv**: [Phixiv](https://github.com/thelaao/phixiv)
 - **TikTok**: [fxTikTok](https://github.com/okdargy/fxTikTok)/[EmbedEZ](https://embedez.com)/[KKTikTok](https://kkscript.com/)
 - **Reddit**: [FixReddit](https://github.com/MinnDevelopment/fxreddit)/[vxReddit](https://github.com/dylanpdx/vxReddit)/[EmbedEZ](https://embedez.com)

@@ -1,7 +1,9 @@
 from . import bilibiliParser
 from . import defaultParser
+from . import twitterParser
 
 parsers = [
+    twitterParser,
     bilibiliParser,
     defaultParser
 ]

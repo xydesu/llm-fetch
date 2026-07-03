@@ -39,7 +39,10 @@ def parse(url):
         if not title and not description:
             return None
             
-        return f"[網頁連結: {title.strip()} | {description.strip()}]"
+        return {
+            'text': f"[網頁連結: {title.strip()} | {description.strip()}]",
+            'images': []
+        }
     except Exception as e:
         logger.warning(f"抓取網址失敗 ({url}): {str(e)}")
         return None

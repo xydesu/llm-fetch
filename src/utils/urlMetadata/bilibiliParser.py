@@ -126,7 +126,10 @@ def parse(url):
                     logger.warning("Bilibili AI 總結失敗: 帳號未登入 (SESSDATA 可能過期)")
                     result_text += "\n[系統提示: Bilibili SESSDATA 已失效，無法取得 AI 總結]"
                     
-        return result_text
+        return {
+            'text': result_text,
+            'images': []
+        }
     except Exception as e:
         logger.warning(f"Bilibili 網址處理失敗 ({url}): {str(e)}")
         return None

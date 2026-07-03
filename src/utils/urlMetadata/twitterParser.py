@@ -40,16 +40,24 @@ def parse(url):
             likes = status.get('likes', 0)
             
             media_info = []
+            images = []
+            
             if status.get('media'):
                 media = status['media']
                 if media.get('photos') and isinstance(media['photos'], list) and len(media['photos']) > 0:
                     media_info.append(f"{len(media['photos'])} 張圖片")
+                    images = [p.get('url') for p in media['photos'] if p.get('url')]
                 if media.get('video') or media.get('videos'):
                     media_info.append("包含影片")
                     
             media_text = f" [附帶: {', '.join(media_info)}]" if media_info else ""
             
-            return f"[Twitter 推文 | 作者: {author} | 轉推: {reposts} 喜歡: {likes}{media_text}]\n{text}"
+            result_text = f"[Twitter 推文 | 作者: {author} | 轉推: {reposts} 喜歡: {likes}{media_text}]\n{text}"
+            
+            return {
+                'text': result_text,
+                'images': images
+            }
     except Exception as e:
         logger.warning(f"[Twitter 網址解析失敗] {str(e)}")
         

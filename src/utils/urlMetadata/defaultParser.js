@@ -40,6 +40,9 @@ module.exports = {
     parse: async (url) => {
         const metadata = await fetchUrlMetadata(url);
         if (!metadata) return null;
-        return `[網頁連結: ${metadata.title} | ${metadata.description}]`;
+        return {
+            text: `[網頁連結: ${metadata.title} | ${metadata.description}]`,
+            images: []
+        };
     }
 };

@@ -40,9 +40,12 @@ async function parse(urlString) {
             
             // 媒體內容判斷
             let mediaInfo = [];
+            let images = [];
+            
             if (data.status.media) {
                 if (data.status.media.photos && Array.isArray(data.status.media.photos) && data.status.media.photos.length > 0) {
                     mediaInfo.push(`${data.status.media.photos.length} 張圖片`);
+                    images = data.status.media.photos.map(p => p.url).filter(Boolean);
                 }
                 if (data.status.media.video || data.status.media.videos) {
                     mediaInfo.push(`包含影片`);
@@ -50,10 +53,15 @@ async function parse(urlString) {
             }
             const mediaText = mediaInfo.length > 0 ? ` [附帶: ${mediaInfo.join(', ')}]` : '';
 
-            return [
+            const resultText = [
                 `[Twitter 推文 | 作者: ${author} | 轉推: ${reposts} 喜歡: ${likes}${mediaText}]`,
                 `${text}`
-            ];
+            ].join('\n');
+
+            return {
+                text: resultText,
+                images: images
+            };
         }
     } catch (e) {
         console.error(`[Twitter 網址解析失敗] ${e.message}`);

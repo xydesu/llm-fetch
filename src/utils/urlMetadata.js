@@ -10,15 +10,21 @@ async function extractUrlsMetadata(text) {
     // 移除重複並限制最多處理 2 個 URL，避免過度延遲
     const uniqueUrls = [...new Set(urls)].slice(0, 2);
     const results = [];
+    const images = [];
     
     for (const url of uniqueUrls) {
-        const metadataString = await parseUrl(url);
-        if (metadataString) {
-            results.push(metadataString);
+        const metadata = await parseUrl(url);
+        if (metadata) {
+            if (metadata.text) {
+                results.push(metadata.text);
+            }
+            if (metadata.images && metadata.images.length > 0) {
+                images.push(...metadata.images);
+            }
         }
     }
     
-    return results; // 這裡回傳的已經是格式化好的字串陣列
+    return { texts: results, images: images };
 }
 
 module.exports = { extractUrlsMetadata };

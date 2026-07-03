@@ -150,7 +150,10 @@ module.exports = {
                 }
             }
 
-            return resultText;
+            return {
+                text: resultText,
+                images: []
+            };
         } catch (err) {
             logger.warn(`Bilibili 網址處理失敗 (${url}): ${err.message}`);
             return null;

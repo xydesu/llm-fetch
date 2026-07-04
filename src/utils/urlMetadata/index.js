@@ -3,6 +3,7 @@ const bilibiliParser = require('./bilibiliParser');
 const twitterParser = require('./twitterParser');
 const youtubeParser = require('./youtubeParser');
 const facebookParser = require('./facebookParser');
+const threadsParser = require('./threadsParser');
 
 // 解析器清單，優先順序由上到下
 const parsers = [
@@ -10,6 +11,7 @@ const parsers = [
     twitterParser,
     bilibiliParser,
     facebookParser,
+    threadsParser,
     defaultParser
 ];
 

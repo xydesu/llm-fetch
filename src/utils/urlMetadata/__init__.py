@@ -3,8 +3,10 @@ from . import defaultParser
 from . import twitterParser
 from . import youtubeParser
 from . import facebookParser
+from . import threadsParser
 
 parsers = [
+    threadsParser,
     facebookParser,
     youtubeParser,
     twitterParser,

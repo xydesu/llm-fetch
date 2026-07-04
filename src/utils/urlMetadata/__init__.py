@@ -2,8 +2,10 @@ from . import bilibiliParser
 from . import defaultParser
 from . import twitterParser
 from . import youtubeParser
+from . import facebookParser
 
 parsers = [
+    facebookParser,
     youtubeParser,
     twitterParser,
     bilibiliParser,

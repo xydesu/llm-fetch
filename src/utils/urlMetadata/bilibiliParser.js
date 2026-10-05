@@ -1,5 +1,9 @@
 const crypto = require('crypto');
+const cheerio = require('cheerio');
 const logger = require('../logger');
+const promptLoader = require('../promptLoader');
+
+const URL_CONTEXT_PROMPT_FILE = 'url_context_rules.md';
 
 // Wbi 簽名金鑰快取 (每日有效)
 let wbiKeysCache = { img_key: null, sub_key: null, timestamp: 0 };
@@ -88,25 +92,85 @@ module.exports = {
             if (!bvidMatch) return null;
             const bvid = bvidMatch[1];
 
-            // 1. 取得影片基本資訊 (無須登入)
-            const viewRes = await fetch(`https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`, {
-                headers: { 'User-Agent': 'Mozilla/5.0' }
-            });
-            const viewJson = await viewRes.json();
-            
-            if (viewJson.code !== 0) {
-                logger.warn(`Bilibili 影片解析失敗 (${bvid}): ${viewJson.message}`);
-                return null;
+            let title = '';
+            let upName = promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'bilibili_unknown_up');
+            let desc = '';
+            let picUrl = '';
+            let cid = null;
+            let up_mid = null;
+
+            // 1. 優先嘗試 API 讀取
+            try {
+                const keys = await getWbiKeys();
+                let apiUrl = `https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`;
+                if (keys) {
+                    const query = encWbi({ bvid }, keys.img_key, keys.sub_key);
+                    apiUrl = `https://api.bilibili.com/x/web-interface/wbi/view?${query}`;
+                }
+
+                const viewRes = await fetch(apiUrl, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Referer': 'https://www.bilibili.com/'
+                    },
+                    signal: AbortSignal.timeout(6000)
+                });
+                const text = await viewRes.text();
+                if (text.startsWith('{')) {
+                    const viewJson = JSON.parse(text);
+                    if (viewJson.code === 0 && viewJson.data) {
+                        const videoData = viewJson.data;
+                        title = videoData.title || '';
+                        upName = videoData.owner?.name || promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'bilibili_unknown_up');
+                        desc = videoData.desc || '';
+                        picUrl = (videoData.pic || '').trim();
+                        cid = videoData.cid;
+                        up_mid = videoData.owner?.mid;
+                    }
+                }
+            } catch (apiErr) {
+                logger.debug(`[Bilibili] API 解析失敗，啟動網頁 HTML 備援: ${apiErr.message}`);
             }
 
-            const videoData = viewJson.data;
-            const title = videoData.title;
-            const upName = videoData.owner.name;
-            const desc = videoData.desc || '';
-            const cid = videoData.cid;
-            const up_mid = videoData.owner.mid;
+            // 2. 若 API 遭風控或失敗，使用原生 HTML OpenGraph 進行備援解析
+            if (!title) {
+                try {
+                    const pageRes = await fetch(`https://www.bilibili.com/video/${bvid}`, {
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                            'Accept-Language': 'zh-TW,zh;q=0.9,ja;q=0.8,en;q=0.7'
+                        },
+                        signal: AbortSignal.timeout(6000)
+                    });
+                    if (pageRes.ok) {
+                        const html = await pageRes.text();
+                        const $ = cheerio.load(html);
+                        title = ($('meta[property="og:title"]').attr('content') || $('title').text() || '').replace(/_哔哩哔哩_bilibili$/i, '').trim();
+                        desc = ($('meta[property="og:description"]').attr('content') || $('meta[name="description"]').attr('content') || '').trim();
+                        picUrl = ($('meta[property="og:image"]').attr('content') || '').trim();
+                        upName = ($('meta[name="author"]').attr('content') || '').trim() || promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'bilibili_up_fallback');
+                    }
+                } catch (htmlErr) {
+                    logger.warn(`[Bilibili] HTML 備援解析失敗: ${htmlErr.message}`);
+                }
+            }
 
-            let resultText = `[Bilibili 影片: ${title} | UP主: ${upName} | 描述: ${desc.slice(0, 100)}${desc.length > 100 ? '...' : ''}]`;
+            if (!title) return null;
+
+            let images = [];
+            if (picUrl) {
+                if (picUrl.startsWith('//')) {
+                    picUrl = 'https:' + picUrl;
+                }
+                images.push(picUrl);
+            }
+
+            const descriptionText = desc.slice(0, 100) + (desc.length > 100 ? promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'description_ellipsis') : '');
+            let resultText = promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'bilibili_video', {
+                title: title,
+                up_name: upName,
+                description: descriptionText
+            });
 
             // 2. 取得 AI 總結 (需要 SESSDATA)
             const sessdata = process.env.BILIBILI_SESSDATA;
@@ -130,29 +194,29 @@ module.exports = {
                         let summary = modelResult.summary || '';
                         
                         if (summary) {
-                            resultText += `\n[AI 總結: ${summary}]`;
+                            resultText += '\n' + promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'bilibili_ai_summary', { summary: summary });
                         }
 
                         // 加入提綱
                         if (modelResult.outline && modelResult.outline.length > 0) {
                             let outlineTexts = [];
                             for (const part of modelResult.outline) {
-                                if (part.title) outlineTexts.push(`- ${part.title}`);
+                                if (part.title) outlineTexts.push(promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'bilibili_outline_item', { title: part.title }));
                             }
                             if (outlineTexts.length > 0) {
-                                resultText += `\n[影片提綱:\n${outlineTexts.join('\n')}]`;
+                                resultText += '\n' + promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'bilibili_outline', { outline: outlineTexts.join('\n') });
                             }
                         }
                     } else if (conclusionJson.code === -101) {
                         logger.warn(`Bilibili AI 總結失敗: 帳號未登入 (SESSDATA 可能過期)`);
-                        resultText += `\n[系統提示: Bilibili SESSDATA 已失效，無法取得 AI 總結]`;
+                        resultText += '\n' + promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'bilibili_sessdata_invalid');
                     }
                 }
             }
 
             return {
                 text: resultText,
-                images: []
+                images: images
             };
         } catch (err) {
             logger.warn(`Bilibili 網址處理失敗 (${url}): ${err.message}`);

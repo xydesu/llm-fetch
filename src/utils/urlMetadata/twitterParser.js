@@ -1,4 +1,7 @@
 const URL = require('url');
+const promptLoader = require('../promptLoader');
+
+const URL_CONTEXT_PROMPT_FILE = 'url_context_rules.md';
 
 const TWITTER_DOMAINS = ['twitter.com', 'x.com', 'fxtwitter.com', 'fixupx.com', 'vxtwitter.com'];
 
@@ -34,29 +37,62 @@ async function parse(urlString) {
         
         if (data.code === 200 && data.status) {
             const author = data.status.author ? data.status.author.name : 'Unknown';
-            const text = data.status.text || '';
+            const text = (data.status.text || '').trim();
             const reposts = data.status.reposts || 0;
             const likes = data.status.likes || 0;
             
-            // 媒體內容判斷
+            // 媒體內容判斷與縮圖提取
             let mediaInfo = [];
             let images = [];
             
             if (data.status.media) {
                 if (data.status.media.photos && Array.isArray(data.status.media.photos) && data.status.media.photos.length > 0) {
-                    mediaInfo.push(`${data.status.media.photos.length} 張圖片`);
-                    images = data.status.media.photos.map(p => p.url).filter(Boolean);
+                    mediaInfo.push(promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'twitter_media_photo_count', { count: data.status.media.photos.length }));
+                    for (const p of data.status.media.photos) {
+                        if (p.url && !images.includes(p.url)) {
+                            images.push(p.url);
+                        }
+                    }
                 }
                 if (data.status.media.video || data.status.media.videos) {
-                    mediaInfo.push(`包含影片`);
+                    const videoList = Array.isArray(data.status.media.videos) 
+                        ? data.status.media.videos 
+                        : (data.status.media.video ? [data.status.media.video] : []);
+                    mediaInfo.push(videoList.length > 0
+                        ? promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'twitter_media_video_count', { count: videoList.length })
+                        : promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'twitter_media_video_only'));
+                    for (const v of videoList) {
+                        if (v.thumbnail_url && !images.includes(v.thumbnail_url)) {
+                            images.push(v.thumbnail_url);
+                        }
+                    }
+                }
+                // 備用遍歷 media.all 補全可能遺漏的縮圖
+                if (Array.isArray(data.status.media.all)) {
+                    for (const item of data.status.media.all) {
+                        const thumb = item.thumbnail_url || (item.type === 'photo' ? item.url : null);
+                        if (thumb && !images.includes(thumb)) {
+                            images.push(thumb);
+                        }
+                    }
                 }
             }
-            const mediaText = mediaInfo.length > 0 ? ` [附帶: ${mediaInfo.join(', ')}]` : '';
+            const mediaText = mediaInfo.length > 0
+                ? ' ' + promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'twitter_media_note', { media_items: mediaInfo.join(', ') })
+                : '';
 
-            const resultText = [
-                `[Twitter 推文 | 作者: ${author} | 轉推: ${reposts} 喜歡: ${likes}${mediaText}]`,
-                `${text}`
-            ].join('\n');
+            // 確保無文字時明確標示，避免大腦誤將作者暱稱當作推文主題
+            const contentText = text || (images.length > 0
+                ? promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'twitter_media_only_text')
+                : promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'twitter_no_text'));
+
+            const resultText = promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'twitter_post', {
+                author: author,
+                reposts: reposts,
+                likes: likes,
+                media_text: mediaText,
+                content_text: contentText
+            });
 
             return {
                 text: resultText,

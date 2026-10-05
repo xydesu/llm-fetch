@@ -1,5 +1,8 @@
 const cheerio = require('cheerio');
 const logger = require('../logger');
+const promptLoader = require('../promptLoader');
+
+const URL_CONTEXT_PROMPT_FILE = 'url_context_rules.md';
 
 module.exports = {
     match: (url) => {
@@ -73,18 +76,26 @@ module.exports = {
             if (!title || title.includes('Log in or sign up') || title === 'Facebook') return null;
 
             if (description.length > 200) {
-                description = description.substring(0, 200) + '...';
+                description = description.substring(0, 200) + promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'description_ellipsis');
             }
-
-            const resultText = [
-                `[Facebook 推文 | ${title}]`,
-                `${description}`
-            ].join('\n');
 
             const images = [];
             if (imageUrl) {
                 images.push(imageUrl);
             }
+
+            const contentText = description || (images.length > 0
+                ? promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'facebook_media_only_text')
+                : promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'facebook_no_text'));
+            const mediaCountText = images.length > 0
+                ? ' ' + promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'facebook_media_count', { count: images.length })
+                : '';
+
+            const resultText = promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'facebook_post', {
+                author: title,
+                media_text: mediaCountText,
+                content_text: contentText
+            });
 
             return {
                 text: resultText,

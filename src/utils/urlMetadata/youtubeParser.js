@@ -1,4 +1,7 @@
 const URL = require('url');
+const promptLoader = require('../promptLoader');
+
+const URL_CONTEXT_PROMPT_FILE = 'url_context_rules.md';
 
 const YOUTUBE_DOMAINS = ['youtube.com', 'youtu.be'];
 
@@ -88,15 +91,21 @@ async function parse(urlString) {
             description = description.substring(0, 200) + '...';
         }
 
-        const resultText = [
-            `[YouTube 影片 | 頻道: ${channelTitle} | 觀看次數: ${viewCount}]`,
-            `標題: ${title}`,
-            `描述: ${description}`
-        ].join('\n');
+        // 提取影片縮圖
+        const thumbnails = snippet.thumbnails || {};
+        const thumbUrl = thumbnails.maxres?.url || thumbnails.standard?.url || thumbnails.high?.url || thumbnails.medium?.url || thumbnails.default?.url || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+        const images = thumbUrl ? [thumbUrl] : [];
+
+        const resultText = promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'youtube_video', {
+            channel_title: channelTitle,
+            view_count: viewCount,
+            title: title,
+            description: description || promptLoader.renderPromptSection(URL_CONTEXT_PROMPT_FILE, 'youtube_no_description')
+        });
 
         return {
             text: resultText,
-            images: []
+            images: images
         };
     } catch (e) {
         console.error(`[YouTube 網址解析失敗] ${e.message}`);

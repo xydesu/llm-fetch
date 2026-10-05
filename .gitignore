@@ -6,9 +6,9 @@
 
 # 基本必要檔案
 !.gitignore
-!README.md
-!package.json
-!package-lock.json
+!/README.md
+!/package.json
+!/package-lock.json
 
 # 僅開源的工具 (fetch 相關)
 !src/utils/**
